@@ -18,7 +18,7 @@ function checkSSL (site, refresh, reply, resolve) {
     if ( result == null ) {
       sslChecker(site, 'GET', 443)
       .then(result => {
-        client.set(site, JSON.stringify(result))
+        client.set(site, JSON.stringify(result), 'EX', 86400)
         reply.header('X-CACHE', 'MISS')
         console.info({cache: false})
         resolve(result)
