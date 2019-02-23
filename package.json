@@ -1,0 +1,22 @@
+{
+  "name": "health-check-tools",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "author": "Toomas Vahtra",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zpotoloom/health-check-tools.git"
+  },
+  "dependencies": {
+    "cluster": "^0.7.7",
+    "fastify": "^1.14.1",
+    "fastify-swagger": "^1.1.0",
+    "redis": "^2.8.0",
+    "ssl-checker": "^1.2.1"
+  }
+}
