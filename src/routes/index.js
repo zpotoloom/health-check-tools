@@ -52,6 +52,68 @@ const routes = [
   },
   {
     method: 'GET',
+    url: '/api/v1/add-domain/:user/:domain',
+    handler: sslController.addDomain,
+    schema: {
+      description: 'Adds Domain to users domain list',
+      tags: ['Domains'],
+      params: {
+        type: 'object',
+        properties: {
+          user: {
+            type: 'string',
+            description: 'unique user id'
+          },
+          domain: {
+            type: 'string',
+            description: 'domain name'
+          }
+        }
+      }
+    }
+  },
+  {
+    method: 'GET',
+    url: '/api/v1/del-domain/:user/:domain',
+    handler: sslController.delDomain,
+    schema: {
+      description: 'Deletes Domain from users domain list',
+      tags: ['Domains'],
+      params: {
+        type: 'object',
+        properties: {
+          user: {
+            type: 'string',
+            description: 'unique user id'
+          },
+          domain: {
+            type: 'string',
+            description: 'domain name'
+          }
+        }
+      }
+    }
+  },
+  {
+    method: 'GET',
+    url: '/api/v1/get-domains/:user',
+    handler: sslController.getDomains,
+    schema: {
+      description: 'Get Domains in users domain list',
+      tags: ['Domains'],
+      params: {
+        type: 'object',
+        properties: {
+          user: {
+            type: 'string',
+            description: 'unique user id'
+          }
+        }
+      }
+    }
+  },
+  {
+    method: 'GET',
     url: '/api/v1/system-info',
     handler: sysController.getInfo,
     schema: {

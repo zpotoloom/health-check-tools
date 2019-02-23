@@ -45,3 +45,32 @@ exports.getValidity = async (req, reply) => {
     })
     return res
 }
+
+exports.addDomain = async (req, reply) => {
+  var res = await new Promise(function (resolve) {
+    const result = client.hset(req.params.user, req.params.domain, req.params.user)
+    resolve(result)
+  })
+  return res
+}
+
+exports.delDomain = async (req, reply) => {
+  var res = await new Promise(function (resolve) {
+    const result = client.hdel(req.params.user, req.params.domain)
+    resolve(result)
+  })
+  return res
+}
+
+exports.getDomains = async (req, reply) => {
+  var res = await new Promise(async function (resolve) {
+    client.hgetall(req.params.user, function(err, results) {
+      if (err) {
+       resolve(err)
+      } else {
+        resolve(results)
+      }
+    });
+  })
+  return res
+}
