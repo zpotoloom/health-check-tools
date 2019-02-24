@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SSL validity check</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+  <style>
+    body{background: black !important;}
+    .table{
+      background: black !important;
+      color: white !important;
+    }
+  </style>
+  <script >
+
+    var sites = [];
+
+    function load_table (refresh) {
+        $.ajax({
+          url: "/api/v1/get-domains/zpoto",
+          method: "get",
+          success: function(result) {
+            console.log(Object.keys(result));
+            sites = Object.keys(result);
+            get_validity(refresh);
+          }
+        });
+    }
+    
+    var ajax_caller = function(data) {
+      return $.ajax({
+        url: data.url + data.domain + data.refresh, 
+        method: data.method,
+        success: function(result) {
+          result.domain = data.domain;
+          //console.log(result);
+          drawRow(result);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+          var result = XMLHttpRequest.responseJSON.error;
+          result.domain = data.domain;
+          drawInvalidRow(result); 
+        } 
+      });
+    };
+
+    var ajax_calls = [];
+
+    function get_validity (refresh) {
+      var opt = "";
+      if ( refresh == true ) {
+        opt = "?refresh";
+      }
+      for( i = 0; i < sites.length; i++){
+        var domain = sites[i];
+        ajax_calls.push(ajax_caller({
+          method: "get",
+          url: "/api/v1/ssl-validity/",
+          domain: domain,
+          refresh: opt
+        }));
+      }
+    }
+
+    function drawRow(rowData) {
+      var color = "";
+      if ( rowData.days_remaining >= 29 && rowData.valid ) { color = ""; }
+      else { color = "class='bg-danger'"; } 
+      var row = $("<tr " + color + "/>")
+      $("#ssltable").append(row);
+      row.append($("<td>" + rowData.domain + "</td>"));
+      row.append($("<td>" + rowData.valid_from + "</td>"));
+      row.append($("<td>" + rowData.valid_to + "</td>"));
+      row.append($("<td>" + rowData.days_remaining + "</td>"));
+      row.append($("<td>" + rowData.valid + "</td>"));
+    }
+    
+    function drawInvalidRow(err) {
+      var row = $("<tr class='bg-warning' />")
+      $("#ssltable").append(row);
+      row.append($("<td>" + err.domain + "</td>"));
+      row.append($("<td>" + err.code + "</td>"));
+      row.append($("<td>" + err.errno + "</td>"));
+      row.append($("<td>" + err.port + "</td>"));
+      row.append($("<td>" + err.syscall + "</td>"));
+    }
+
+</script>
+</head>
+<body onload="load_table(false);">
+<!--  <button onclick="load_table(true)">Refresh cached data</button>-->
+<table id="ssltable" class="table table-sm table-dark">
+    <tr>
+        <th>Domain</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Remaining</th>
+        <th>Valid</th>
+    </tr>
+</table>
+
+
+</body>
+</html>
