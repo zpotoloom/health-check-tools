@@ -3,31 +3,39 @@
 <head>
   <title>SSL validity check</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
   <style>
-    table {
-      border: 1px solid #666;   
-      width: 100%;
+    body{background: black !important;}
+    .table{
+      background: black !important;
+      color: white !important;
     }
-    th {
-      background: #f8f8f8; 
-      font-weight: bold;    
-      padding: 2px;
-      text-align: left;
-    } 
   </style>
   <script >
 
     var sites = [];
 
+function load_table (refresh) {
     $.ajax({
       url: "/api/v1/get-domains/zpoto",
       method: "get",
       success: function(result) {
         console.log(Object.keys(result));
         sites = Object.keys(result);
-        get_validity();
+        get_validity(refresh);
       }
     });
+}
 
 function add_domain() {
 var domain = document.getElementById("domain").value
@@ -54,7 +62,7 @@ console.log(domain);
 }
 var ajax_caller = function(data) {
     return $.ajax({
-        url: data.url + data.domain, 
+        url: data.url + data.domain + data.refresh, 
         method: data.method,
         success: function(result) {
           result.domain = data.domain;
@@ -70,21 +78,26 @@ var ajax_caller = function(data) {
 };
 var ajax_calls = [];
 
-function get_validity () {
+function get_validity (refresh) {
+var opt = "";
+if ( refresh == true ) {
+  opt = "?refresh";
+}
     for( i = 0; i < sites.length; i++){
       var domain = sites[i];
       ajax_calls.push(ajax_caller({
         method: "get",
         url: "/api/v1/ssl-validity/",
-        domain: domain
+        domain: domain,
+        refresh: opt
       }));
     }
 }
 
 function drawRow(rowData) {
     var color = "";
-    if ( rowData.days_remaining >= 29 && rowData.valid ) { color = "bgcolor='lightgreen'"; }
-    else { color = "bgcolor='red'"; } 
+    if ( rowData.days_remaining >= 29 && rowData.valid ) { color = ""; }
+    else { color = "class='bg-danger'"; } 
     var row = $("<tr " + color + "/>")
     $("#ssltable").append(row);
     row.append($("<td>" + rowData.domain + "</td>"));
@@ -92,32 +105,32 @@ function drawRow(rowData) {
     row.append($("<td>" + rowData.valid_to + "</td>"));
     row.append($("<td>" + rowData.days_remaining + "</td>"));
     row.append($("<td>" + rowData.valid + "</td>"));
-    row.append($("<td><button value='" + rowData.domain + "' onclick='del_domain(this.value);'>Delete</button></td>"));
+    row.append($("<td><button class='btn btn-sm btn-light' value='" + rowData.domain + "' onclick='del_domain(this.value);'>Delete</button></td>"));
 }
 
 function drawInvalidRow(err) {
-    var row = $("<tr bgcolor='gray' />")
-    $("#ssltableinvalid").append(row);
+    var row = $("<tr class='bg-warning' />")
+    $("#ssltable").append(row);
     row.append($("<td>" + err.domain + "</td>"));
     row.append($("<td>" + err.code + "</td>"));
     row.append($("<td>" + err.errno + "</td>"));
     row.append($("<td>" + err.port + "</td>"));
     row.append($("<td>" + err.syscall + "</td>"));
-    row.append($("<td><button value='" + err.domain + "' onclick='del_domain(this.value);'>Delete invalid</button></td>"));
+    row.append($("<td><button class='btn btn-sm btn-light' value='" + err.domain + "' onclick='del_domain(this.value);'>Delete</button></td>"));
 }
 
 </script>
 </head>
-<body>
-
+<body onload="load_table(false);">
+  <!--  <button onclick="load_table(true)">Refresh cached data</button> -->
 <form method="" action="" id="add_domain" onsubmit="add_domain(); return false;"></form>
 
-<table id="ssltableinvalid">
+<table id="ssltableinvalid" class="table table-sm table-dark">
 </table>
-<table id="ssltable">
+<table id="ssltable" class="table table-sm table-dark">
     <tr>
         <td><input style="width:100%; padding-left:0px; padding-right:0px;" type="text" name="domain" form="add_domain" id="domain" /></td>
-        <td><input type="submit" value="Add domain" form="add_domain" /></td>
+        <td><input type="submit" class="btn btn-sm btn-light" value="Add domain" form="add_domain" /></td>
         <td></td>
         <td></td>
         <td></td>
@@ -132,6 +145,7 @@ function drawInvalidRow(err) {
         <th></th>
     </tr>
 </table>
+
 
 </body>
 </html>
