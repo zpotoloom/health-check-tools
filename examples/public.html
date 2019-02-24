@@ -4,19 +4,19 @@
   <title>SSL validity check</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   
-  <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-  <!-- Bootstrap CSS -->
+  <meta http-equiv="refresh" content="600">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
   <style>
-    body{background: black !important;}
-    .table{
+    body {
+      background: black !important;
+    }
+    .table {
       background: black !important;
       color: white !important;
     }
@@ -26,15 +26,14 @@
     var sites = [];
 
     function load_table (refresh) {
-        $.ajax({
-          url: "/api/v1/get-domains/zpoto",
-          method: "get",
-          success: function(result) {
-            console.log(Object.keys(result));
-            sites = Object.keys(result);
-            get_validity(refresh);
-          }
-        });
+      $.ajax({
+        url: "/api/v1/get-domains/zpoto",
+        method: "get",
+        success: function(result) {
+          sites = Object.keys(result);
+          get_validity(refresh);
+        }
+      });
     }
     
     var ajax_caller = function(data) {
@@ -43,7 +42,6 @@
         method: data.method,
         success: function(result) {
           result.domain = data.domain;
-          //console.log(result);
           drawRow(result);
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
@@ -60,6 +58,7 @@
       var opt = "";
       if ( refresh == true ) {
         opt = "?refresh";
+        $("#ssltable").empty();
       }
       for( i = 0; i < sites.length; i++){
         var domain = sites[i];
@@ -94,21 +93,21 @@
       row.append($("<td>" + err.port + "</td>"));
       row.append($("<td>" + err.syscall + "</td>"));
     }
-
-</script>
+  </script>
 </head>
 <body onload="load_table(false);">
-<!--  <button onclick="load_table(true)">Refresh cached data</button>-->
-<table id="ssltable" class="table table-sm table-dark">
-    <tr>
-        <th>Domain</th>
+  <table id="ssl" class="table table-sm table-dark">
+    <thead>
+      <tr>
+        <th onclick="load_table(true);">Domain</th>
         <th>From</th>
         <th>To</th>
         <th>Remaining</th>
         <th>Valid</th>
-    </tr>
-</table>
-
-
+      </tr>
+    </thead>
+    <tbody id="ssltable">
+    </tbody>
+  </table>
 </body>
 </html>
