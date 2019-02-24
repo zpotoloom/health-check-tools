@@ -30,7 +30,7 @@
     }
   </style>
   <script >
-
+    var company = "zpoto";
     var sites = [];
 
     function sort_table () {
@@ -40,7 +40,7 @@
     function load_table (refresh) {
       setTimeout(sort_table, 2000);
       $.ajax({
-        url: "/api/v1/get-domains/zpoto",
+        url: "/api/v1/get-domains/" + company,
         method: "get",
         success: function(result) {
           sites = Object.keys(result);
@@ -85,12 +85,12 @@
     }
 
     function drawRow(rowData) {
-      var color = "";
-      if ( rowData.days_remaining >= 29 && rowData.valid ) { color = ""; }
+      var color = "class=''";
+      if ( rowData.days_remaining >= 29 && rowData.valid ) { color = "class=''"; }
       else { color = "class='bg-danger'"; } 
       var row = $("<tr " + color + "/>")
       $("#ssltable").append(row);
-      row.append($("<td>" + rowData.domain + "</td>"));
+      row.append($("<td onclick='load_table(true);'>" + rowData.domain + "</td>"));
       row.append($("<td>" + rowData.valid_from + "</td>"));
       row.append($("<td>" + rowData.valid_to + "</td>"));
       row.append($("<td>" + rowData.days_remaining + "</td>"));
@@ -112,8 +112,8 @@
   <table id="ssl" class="table table-sm table-dark sortable">
     <thead>
       <tr>
-        <th onclick="load_table(true);">Domain</th>
-        <th>From</th>
+        <th>Domain</th>
+	<th>From</th>
         <th>To</th>
         <th class="default-sort">Remaining</th>
         <th>Valid</th>
@@ -125,19 +125,21 @@
   <script>
     $(function() {
       $.tablesort.defaults = {
-      debug: $.tablesort.DEBUG,    // Outputs some basic debug info when true.
-      asc: 'sorted ascending',     // CSS classes added to `<th>` elements on sort.
-      desc: 'sorted descending',
-      compare: function(a, b) {    // Function used to compare values when sorting.
-          if (a < b) {
+        debug: $.tablesort.DEBUG,    // Outputs some basic debug info when true.
+        asc: 'sorted ascending',     // CSS classes added to `<th>` elements on sort.
+        desc: 'sorted descending',
+        compare: function(a, b) {    // Function used to compare values when sorting.
+	    if ( parseInt(a) ) { a = parseInt(a); }
+	    if ( parseInt(b) ) { b = parseInt(b); }
+	    if (a > b) {
               return 1;
-          } else if (a > b) {
-              return -1;
-          } else {
-              return 0;
-          }
-      }
-    };
+            } else if (a < b) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+      };
     });
   </script>
 </body>
